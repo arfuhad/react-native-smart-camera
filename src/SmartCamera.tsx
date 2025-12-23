@@ -6,9 +6,8 @@ import {
   useCameraPermission,
   useFrameProcessor,
   type CameraProps,
-  type Orientation,
 } from 'react-native-vision-camera';
-import { useSharedValue, runOnJS } from 'react-native-worklets-core';
+import { useSharedValue, useRunOnJS } from 'react-native-worklets-core';
 
 import type {
   SmartCameraProps,
@@ -236,6 +235,9 @@ export function SmartCamera({
     processBlink(faces);
   }, [onFaceDetected, processBlink]);
 
+  // Create a worklet-callable version of handleFacesDetected
+  const handleFacesDetectedWorklet = useRunOnJS(handleFacesDetected, [handleFacesDetected]);
+
   // Frame processor for face detection
   const frameProcessor = useFrameProcessor((frame) => {
     'worklet';
@@ -257,11 +259,11 @@ export function SmartCamera({
     // Call native face detection
     try {
       const faces = detectFaces(frame, faceDetectionOptions);
-      runOnJS(handleFacesDetected)(faces);
+      handleFacesDetectedWorklet(faces);
     } catch (error) {
       // Silently handle errors in worklet context
     }
-  }, [faceDetection?.enabled, blinkDetection, faceDetectionOptions, handleFacesDetected]);
+  }, [faceDetection?.enabled, blinkDetection, faceDetectionOptions, handleFacesDetectedWorklet]);
 
   // Handle camera ready
   const handleCameraReady = useCallback(() => {
@@ -300,14 +302,14 @@ export function SmartCamera({
   }
 
   // Determine orientation based on device orientation
-  const getOutputOrientation = (): Orientation => {
-    // Default to portrait, VisionCamera handles this automatically
-    return 'portrait';
+  // In VisionCamera v4, OutputOrientation is 'device' | 'preview'
+  const getOutputOrientation = (): 'device' | 'preview' => {
+    // 'device' follows the device's physical orientation
+    return 'device';
   };
 
   // Camera props with full configuration
   const cameraProps: CameraProps = {
-    ref: cameraRef,
     style: StyleSheet.absoluteFill,
     device,
     isActive: isCameraActive,
@@ -332,7 +334,7 @@ export function SmartCamera({
 
   return (
     <View style={[styles.container, style]}>
-      <Camera {...cameraProps} />
+      <Camera ref={cameraRef} {...cameraProps} />
     </View>
   );
 }

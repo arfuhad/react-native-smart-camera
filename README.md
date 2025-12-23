@@ -1,61 +1,35 @@
 # react-native-smart-camera
 
-Expo-compatible native module for camera preview, face detection, blink detection, and WebRTC streaming.
+An Expo-compatible native module that provides camera preview via VisionCamera, comprehensive face detection using Google ML Kit, blink detection, and a native WebRTC bridge for video calling and streaming.
 
-## Features
+## Requirements
 
-- 📷 Camera preview via VisionCamera
-- 👁️ Real-time face detection with Google ML Kit
-- 😉 Blink detection with configurable sensitivity
-- 📡 Native WebRTC bridge for video calling and streaming
-- 🔌 Expo config plugin for zero-config setup
-- 📱 Static image face detection
-
-## Expo Compatibility
-
-| Expo Workflow   | Supported | Notes                              |
-| --------------- | --------- | ---------------------------------- |
-| Expo Managed    | ❌ No     | Requires native code               |
-| Expo Dev Client | ✅ Yes    | Recommended for development        |
-| Expo Bare       | ✅ Yes    | Full native control                |
-
-**Requirements:**
 - Expo SDK ≥ 49
-- Expo Dev Client or Bare Workflow
-- EAS Build or local native builds
+- Expo Dev Client (required)
+- EAS Build
+
+> **Important**: This package does NOT work with Expo Go. You must use Expo Dev Client or Bare Workflow.
+
+| Expo Workflow | Supported | Why |
+|---------------|-----------|-----|
+| Expo Managed (Go) | ❌ No | WebRTC + VisionCamera need native code |
+| Expo Dev Client | ✅ Yes | Allows custom native modules |
+| Expo Bare | ✅ Yes | Full native control |
 
 ## Installation
 
 ```bash
-# Install the package
-npx expo install react-native-smart-camera
-
-# Install peer dependencies
-npx expo install react-native-vision-camera react-native-webrtc react-native-worklets-core
-
-# Rebuild native code
-npx expo prebuild
-npx expo run:ios
+expo install react-native-smart-camera
+expo prebuild
+expo run:ios
 # or
-npx expo run:android
+expo run:android
 ```
 
-## Expo Config Plugin
+Or with EAS Build:
 
-Add to your `app.json` or `app.config.js`:
-
-```json
-{
-  "plugins": [
-    [
-      "react-native-smart-camera",
-      {
-        "cameraPermissionText": "Allow camera access for face detection",
-        "microphonePermissionText": "Allow microphone for audio streaming"
-      }
-    ]
-  ]
-}
+```bash
+eas build --profile development
 ```
 
 ## Usage
@@ -65,7 +39,7 @@ Add to your `app.json` or `app.config.js`:
 ```tsx
 import { SmartCamera } from 'react-native-smart-camera';
 
-export default function App() {
+function App() {
   return (
     <SmartCamera
       camera="front"
@@ -75,14 +49,18 @@ export default function App() {
 }
 ```
 
-### Face Detection
+### Face Detection with Blink Detection
 
 ```tsx
-import { SmartCamera, Face } from 'react-native-smart-camera';
+import { SmartCamera } from 'react-native-smart-camera';
 
-export default function App() {
-  const handleFaces = (faces: Face[]) => {
-    console.log(`Detected ${faces.length} faces`);
+function App() {
+  const handleBlink = (event) => {
+    console.log('Blink detected!', event);
+  };
+
+  const handleFaceDetected = (faces) => {
+    console.log('Faces:', faces);
   };
 
   return (
@@ -94,31 +72,117 @@ export default function App() {
         landmarkMode: 'all',
         classificationMode: 'all',
       }}
-      onFaceDetected={handleFaces}
+      blinkDetection
+      onBlinkDetected={handleBlink}
+      onFaceDetected={handleFaceDetected}
       style={{ flex: 1 }}
     />
   );
 }
 ```
 
-### Blink Detection
+### WebRTC Video Calling
 
 ```tsx
-import { SmartCamera, BlinkEvent } from 'react-native-smart-camera';
+import { SmartCamera } from 'react-native-smart-camera';
+import { RTCPeerConnection } from 'react-native-webrtc';
 
-export default function App() {
-  const handleBlink = (event: BlinkEvent) => {
-    console.log('Blink detected!', event);
-  };
+function VideoCall() {
+  const peerConnection = new RTCPeerConnection(config);
 
   return (
     <SmartCamera
       camera="front"
-      blinkDetection
-      onBlinkDetected={handleBlink}
+      webrtc={{
+        enabled: true,
+        peerConnection,
+        mode: 'call',
+      }}
       style={{ flex: 1 }}
     />
   );
+}
+```
+
+## API Reference
+
+### SmartCamera Props
+
+```tsx
+interface SmartCameraProps {
+  // Camera settings
+  camera?: 'front' | 'back';
+  fps?: number;
+  style?: ViewStyle;
+  
+  // Face Detection Options
+  faceDetection?: FaceDetectionConfig;
+  
+  // Blink Detection
+  blinkDetection?: boolean;
+  onBlinkDetected?: (event: BlinkEvent) => void;
+  
+  // Face Detection Callback
+  onFaceDetected?: (faces: Face[]) => void;
+  
+  // WebRTC Configuration
+  webrtc?: WebRTCConfig;
+}
+```
+
+### Face Detection Options
+
+#### Common Options (Frame Processor and Static Images)
+
+| Option | Description | Default | Options |
+|--------|-------------|---------|---------|
+| `performanceMode` | Favor speed or accuracy when detecting faces | `'fast'` | `'fast'`, `'accurate'` |
+| `landmarkMode` | Whether to identify facial landmarks: eyes, ears, nose, cheeks, mouth | `'none'` | `'none'`, `'all'` |
+| `contourMode` | Whether to detect contours of facial features. Contours are detected for only the most prominent face in an image | `'none'` | `'none'`, `'all'` |
+| `classificationMode` | Whether to classify faces into categories such as 'smiling' and 'eyes open' | `'none'` | `'none'`, `'all'` |
+| `minFaceSize` | Sets the smallest desired face size, expressed as the ratio of the width of the head to width of the image | `0.15` | `number` |
+| `trackingEnabled` | Whether to assign faces an ID to track faces across images. Note: Don't enable with contourMode for best performance | `false` | `boolean` |
+
+#### Frame Processor Options
+
+| Option | Description | Default | Options |
+|--------|-------------|---------|---------|
+| `cameraFacing` | Current active camera | `'front'` | `'front'`, `'back'` |
+| `autoMode` | Handle auto scale (face bounds, contour, landmarks) and rotation on native side. If disabled, results are relative to frame coordinates, not screen/preview. Disable when using Skia Frame Processor | `false` | `boolean` |
+| `windowWidth` | Required when using `autoMode`. Screen width for coordinate scaling | `1.0` | `number` |
+| `windowHeight` | Required when using `autoMode`. Screen height for coordinate scaling | `1.0` | `number` |
+
+#### Static Images
+
+| Option | Description | Default | Options |
+|--------|-------------|---------|---------|
+| `image` | Image source for static face detection | - | `number`, `string`, `{ uri: string }` |
+
+### Types
+
+```tsx
+interface BlinkEvent {
+  timestamp: number;
+  leftEyeOpen: number;  // 0.0 - 1.0
+  rightEyeOpen: number; // 0.0 - 1.0
+  isBlink: boolean;
+  faceId?: number;
+}
+
+interface Face {
+  bounds: { x: number; y: number; width: number; height: number };
+  landmarks?: FaceLandmarks;
+  contours?: FaceContours;
+  smilingProbability?: number;
+  leftEyeOpenProbability?: number;
+  rightEyeOpenProbability?: number;
+  trackingId?: number;
+}
+
+interface WebRTCConfig {
+  enabled: boolean;
+  peerConnection?: RTCPeerConnection;
+  mode?: 'call' | 'stream';
 }
 ```
 
@@ -134,21 +198,109 @@ const faces = await detectFacesInImage({
 });
 ```
 
-## Face Detection Options
+## Hooks
 
-| Option             | Description                                     | Default   | Options               |
-| ------------------ | ----------------------------------------------- | --------- | --------------------- |
-| `performanceMode`  | Speed vs accuracy trade-off                     | `'fast'`  | `'fast'`, `'accurate'`|
-| `landmarkMode`     | Detect facial landmarks                         | `'none'`  | `'none'`, `'all'`     |
-| `contourMode`      | Detect facial contours                          | `'none'`  | `'none'`, `'all'`     |
-| `classificationMode` | Classify smiling/eyes open                    | `'none'`  | `'none'`, `'all'`     |
-| `minFaceSize`      | Minimum face size ratio                         | `0.15`    | `number`              |
-| `trackingEnabled`  | Track faces across frames                       | `false`   | `boolean`             |
+### useSmartCamera
 
-## API Reference
+```tsx
+import { useSmartCamera } from 'react-native-smart-camera';
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for full API documentation.
+const { 
+  hasPermission,
+  requestPermission,
+  device,
+  switchCamera,
+} = useSmartCamera();
+```
+
+### useFaceDetection
+
+```tsx
+import { useFaceDetection } from 'react-native-smart-camera';
+
+const { faces, isDetecting } = useFaceDetection({
+  performanceMode: 'fast',
+  classificationMode: 'all',
+});
+```
+
+### useBlinkDetection
+
+```tsx
+import { useBlinkDetection } from 'react-native-smart-camera';
+
+const { lastBlink, blinkCount } = useBlinkDetection({
+  debounceMs: 300,
+});
+```
+
+### useSmartCameraWebRTC
+
+```tsx
+import { useSmartCameraWebRTC } from 'react-native-smart-camera';
+
+const {
+  videoTrack,
+  startStreaming,
+  stopStreaming,
+  switchCamera,
+} = useSmartCameraWebRTC({
+  peerConnection,
+  mode: 'call',
+});
+```
+
+## Expo Config Plugin
+
+This package includes an Expo config plugin that automatically configures permissions and native dependencies.
+
+```json
+{
+  "expo": {
+    "plugins": ["react-native-smart-camera"]
+  }
+}
+```
+
+The plugin automatically adds:
+- Camera permission (iOS & Android)
+- Microphone permission (iOS & Android)
+- Required iOS frameworks
+- Android ProGuard rules for ML Kit
+
+## Architecture
+
+```
+Expo App
+ ├── SmartCamera (JS Component)
+ ├── VisionCamera (native camera)
+ ├── Frame Processor (worklet)
+ │     └── ML Kit Face Detection
+ ├── Native WebRTC Bridge
+ │     ├── iOS (Swift)
+ │     └── Android (Kotlin)
+ └── react-native-webrtc
+```
+
+## Peer Dependencies
+
+This package requires the following peer dependencies:
+
+```json
+{
+  "react-native-vision-camera": ">=3.0.0",
+  "react-native-webrtc": ">=118.0.0",
+  "react-native-worklets-core": ">=1.0.0"
+}
+```
+
+## Limitations
+
+- ❌ Not supported in Expo Go
+- ❌ Requires Expo Dev Client or Bare Workflow
+- ❌ Native build required (via `expo run:ios/android` or EAS Build)
 
 ## License
 
 MIT
+

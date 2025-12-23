@@ -14,7 +14,7 @@ export interface AndroidPluginOptions {
 /**
  * Add camera and microphone permissions to AndroidManifest.xml
  */
-const withPermissions: ConfigPlugin<AndroidPluginOptions> = (config) => {
+const withPermissions: ConfigPlugin<AndroidPluginOptions> = (config, _options) => {
   return withAndroidManifest(config, (config) => {
     const manifest = config.modResults;
 
@@ -129,7 +129,7 @@ const withProguardRules: ConfigPlugin<AndroidPluginOptions> = (config, options) 
  */
 export const withSmartCameraAndroid: ConfigPlugin<AndroidPluginOptions> = (config, options) => {
   // Add permissions
-  config = withPermissions(config);
+  config = withPermissions(config, options);
 
   // Add ML Kit dependency if enabled
   config = withMLKitDependency(config, options);

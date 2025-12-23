@@ -1,9 +1,10 @@
 import {
   ConfigPlugin,
   withInfoPlist,
-  withPodfile,
-  IOSConfig,
+  withDangerousMod,
 } from '@expo/config-plugins';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export interface IOSPluginOptions {
   cameraPermissionText: string;
@@ -16,16 +17,16 @@ export interface IOSPluginOptions {
  * Add camera and microphone permissions to Info.plist
  */
 const withPermissions: ConfigPlugin<IOSPluginOptions> = (config, options) => {
-  return withInfoPlist(config, (config) => {
+  return withInfoPlist(config, (configWithInfoPlist) => {
     // Camera permission
-    config.modResults.NSCameraUsageDescription =
-      config.modResults.NSCameraUsageDescription ?? options.cameraPermissionText;
+    configWithInfoPlist.modResults.NSCameraUsageDescription =
+      configWithInfoPlist.modResults.NSCameraUsageDescription ?? options.cameraPermissionText;
 
     // Microphone permission
-    config.modResults.NSMicrophoneUsageDescription =
-      config.modResults.NSMicrophoneUsageDescription ?? options.microphonePermissionText;
+    configWithInfoPlist.modResults.NSMicrophoneUsageDescription =
+      configWithInfoPlist.modResults.NSMicrophoneUsageDescription ?? options.microphonePermissionText;
 
-    return config;
+    return configWithInfoPlist;
   });
 };
 
@@ -37,23 +38,31 @@ const withMLKitPod: ConfigPlugin<IOSPluginOptions> = (config, options) => {
     return config;
   }
 
-  return withPodfile(config, (config) => {
-    const podfile = config.modResults;
-    
-    // Check if ML Kit pod is already added
-    if (!podfile.contents.includes('GoogleMLKit/FaceDetection')) {
-      // Add ML Kit pod after the use_expo_modules! line
-      podfile.contents = podfile.contents.replace(
-        /use_expo_modules!/,
-        `use_expo_modules!
+  return withDangerousMod(config, [
+    'ios',
+    async (dangerousConfig) => {
+      const podfilePath = path.join(dangerousConfig.modRequest.platformProjectRoot, 'Podfile');
+      
+      if (fs.existsSync(podfilePath)) {
+        let podfileContents = fs.readFileSync(podfilePath, 'utf-8');
+        
+        // Check if ML Kit pod is already added
+        if (!podfileContents.includes('GoogleMLKit/FaceDetection')) {
+          // Add ML Kit pod after the use_expo_modules! line
+          podfileContents = podfileContents.replace(
+            /use_expo_modules!/,
+            `use_expo_modules!
 
   # SmartCamera ML Kit Face Detection
   pod 'GoogleMLKit/FaceDetection', '~> 4.0.0'`
-      );
-    }
+          );
+          fs.writeFileSync(podfilePath, podfileContents);
+        }
+      }
 
-    return config;
-  });
+      return dangerousConfig;
+    },
+  ]);
 };
 
 /**

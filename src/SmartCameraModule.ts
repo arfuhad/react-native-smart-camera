@@ -1,4 +1,4 @@
-import { requireNativeModule, NativeModulesProxy, EventEmitter } from 'expo-modules-core';
+import { requireNativeModule, EventEmitter } from 'expo-modules-core';
 
 import type { Face, StaticImageOptions, VideoConstraints } from './types';
 
@@ -22,13 +22,21 @@ interface SmartCameraModuleInterface {
   readonly DEFAULT_MIN_FACE_SIZE: number;
   readonly EYE_CLOSED_THRESHOLD: number;
   readonly EYE_OPEN_THRESHOLD: number;
+
+  // Allow additional properties from NativeModule
+  __expo_module_name__?: string;
+  startObserving?: () => void;
+  stopObserving?: () => void;
+  addListener?: unknown;
+  removeListeners?: unknown;
+  [key: string]: unknown;
 }
 
 // Require the native module
 const SmartCameraModule = requireNativeModule<SmartCameraModuleInterface>('SmartCameraModule');
 
 // Create an event emitter for native events
-const emitter = new EventEmitter(SmartCameraModule ?? NativeModulesProxy.SmartCameraModule);
+const emitter = new EventEmitter(SmartCameraModule);
 
 // ============================================================================
 // Face Detection Functions
