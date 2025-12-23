@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "SmartCamera Example",
+    "slug": "smart-camera-example",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.smartcamera"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#000000"
+      },
+      "package": "com.example.smartcamera"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Allow SmartCamera to access your camera",
+          "enableMicrophonePermission": true,
+          "microphonePermissionText": "Allow SmartCamera to access your microphone"
+        }
+      ],
+      [
+        "react-native-smart-camera",
+        {
+          "cameraPermissionText": "Allow camera access for face detection and streaming",
+          "microphonePermissionText": "Allow microphone for audio streaming",
+          "enableMLKit": true,
+          "enableWebRTC": true
+        }
+      ]
+    ],
+    "scheme": "smartcamera-example"
+  }
+}

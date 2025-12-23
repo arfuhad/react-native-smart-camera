@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "android"],
+  "ios": {
+    "modules": ["SmartCameraModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.smartcamera.SmartCameraModule"]
+  }
+}
