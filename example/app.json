@@ -32,7 +32,7 @@
         }
       ],
       [
-        "react-native-smart-camera",
+        "@arfuhad/react-native-smart-camera",
         {
           "cameraPermissionText": "Allow camera access for face detection and streaming",
           "microphonePermissionText": "Allow microphone for audio streaming",

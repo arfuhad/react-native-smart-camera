@@ -5,7 +5,7 @@ import {
   BlinkEvent,
   useSmartCamera,
   useBlinkDetection,
-} from 'react-native-smart-camera';
+} from '@arfuhad/react-native-smart-camera';
 
 export default function BlinkDetectionScreen() {
   const { hasPermission } = useSmartCamera();

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Link } from 'expo-router';
-import { useSmartCamera } from 'react-native-smart-camera';
+import { useSmartCamera } from '@arfuhad/react-native-smart-camera';
 
 export default function HomeScreen() {
   const { hasPermission, requestPermission } = useSmartCamera();

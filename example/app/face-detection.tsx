@@ -4,7 +4,7 @@ import {
   SmartCamera,
   Face,
   useSmartCamera,
-} from 'react-native-smart-camera';
+} from '@arfuhad/react-native-smart-camera';
 
 export default function FaceDetectionScreen() {
   const { hasPermission } = useSmartCamera();

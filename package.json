@@ -1,6 +1,6 @@
 {
   "name": "@arfuhad/react-native-smart-camera",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Expo-compatible native module for camera preview, face detection, blink detection, and WebRTC streaming",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -34,7 +34,8 @@
     "app.plugin.js",
     "expo-module.config.json",
     "README.md",
-    "ARCHITECTURE.md"
+    "ARCHITECTURE.md",
+    "CHANGELOG.md"
   ],
   "repository": {
     "type": "git",
