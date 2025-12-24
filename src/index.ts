@@ -1,24 +1,31 @@
-// Main component
-export { SmartCamera } from './SmartCamera';
-export { default as SmartCameraModule } from './SmartCameraModule';
+/**
+ * @arfuhad/react-native-smart-camera
+ * 
+ * VisionCamera frame processor plugin for face detection, blink detection, and WebRTC streaming.
+ * API designed to match react-native-vision-camera-face-detector.
+ */
 
-// Native module functions
-export {
-  detectFacesInImage,
-  updateFaceDetectionOptions,
-  initializeWebRTC,
-  startWebRTCStream,
-  stopWebRTCStream,
-  pushWebRTCFrame,
-  isWebRTCStreaming,
-  addFaceDetectionListener,
-  addBlinkDetectionListener,
-  addErrorListener,
-  addWebRTCStateChangeListener,
-  Constants,
-} from './SmartCameraModule';
+// =============================================================================
+// PRIMARY EXPORTS (matching react-native-vision-camera-face-detector API)
+// =============================================================================
 
-// Types
+// Frame processor function - use directly in useFrameProcessor
+export { detectFaces, isFaceDetectorAvailable } from './detection/faceDetector';
+
+// Hook for face detection (matches reference package API)
+export { 
+  useFaceDetector, 
+  useFaceDetectorWithCallback,
+  type UseFaceDetectorOptions,
+  type UseFaceDetectorResult,
+  type UseFaceDetectorWithCallbackOptions,
+  type FaceDetectionCallback,
+} from './hooks/useFaceDetector';
+
+// =============================================================================
+// TYPES (matching react-native-vision-camera-face-detector API)
+// =============================================================================
+
 export type {
   // Face Detection Options
   PerformanceMode,
@@ -39,8 +46,10 @@ export type {
   FaceContours,
   Face,
 
-  // Blink Detection
+  // Blink/Eye Detection
   BlinkEvent,
+  EyeStatus,
+  EyeStatusResult,
 
   // WebRTC
   WebRTCMode,
@@ -68,18 +77,20 @@ export type {
   OutputOrientation,
 } from './types';
 
-// Hooks
-export { useSmartCamera, getAvailableCameras } from './hooks/useSmartCamera';
-export { useFaceDetection } from './hooks/useFaceDetection';
-export { useBlinkDetection } from './hooks/useBlinkDetection';
-export { useSmartCameraWebRTC } from './hooks/useSmartCameraWebRTC';
+// =============================================================================
+// ADDITIONAL FEATURES (our package only)
+// =============================================================================
 
-// Frame processors
-export { detectFaces } from './detection/faceDetector';
+// Blink detection
+export { useBlinkDetection, type UseBlinkDetectionOptions } from './hooks/useBlinkDetection';
 export { processBlinkFromFaces, resetBlinkStates, getEyeState } from './detection/blinkProcessor';
 
+// Camera management hooks
+export { useSmartCamera, getAvailableCameras } from './hooks/useSmartCamera';
+export { useFaceDetection, type UseFaceDetectionOptions } from './hooks/useFaceDetection';
+
 // Static image detection
-export { detectFacesInImage as detectFacesInImageAsync } from './detection/staticImageDetector';
+export { detectFacesInImage } from './detection/staticImageDetector';
 
 // Utilities
 export {
@@ -93,5 +104,9 @@ export {
   createPerformanceMonitor,
 } from './utils';
 
-// WebRTC Bridge
+// =============================================================================
+// WEBRTC (Optional - requires react-native-webrtc)
+// =============================================================================
+
+export { useSmartCameraWebRTC, type UseSmartCameraWebRTCOptions } from './hooks/useSmartCameraWebRTC';
 export { WebRTCBridge, getWebRTCBridge } from './webrtc';

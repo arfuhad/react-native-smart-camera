@@ -517,23 +517,39 @@ export interface UseFaceDetectionResult {
 }
 
 /**
+ * Eye status for a single eye
+ */
+export interface EyeStatus {
+  /** Eye open probability (0-1, where 0 = closed, 1 = fully open) */
+  openProbability: number;
+  /** Whether the eye is considered closed based on the threshold */
+  isClosed: boolean;
+}
+
+/**
+ * Current eye status for both eyes
+ */
+export interface EyeStatusResult {
+  /** Left eye status */
+  leftEye: EyeStatus;
+  /** Right eye status */
+  rightEye: EyeStatus;
+  /** Face tracking ID */
+  faceId?: number;
+  /** Timestamp when this status was captured */
+  timestamp: number;
+}
+
+/**
  * Return type for useBlinkDetection hook
  */
 export interface UseBlinkDetectionResult {
-  /**
-   * Last blink event
-   */
-  lastBlink: BlinkEvent | null;
-
-  /**
-   * Total blink count
-   */
-  blinkCount: number;
-
-  /**
-   * Reset blink count
-   */
-  resetCount: () => void;
+  /** Current eye status (null if no face detected) */
+  eyeStatus: EyeStatusResult | null;
+  /** Process faces to get eye status - call this with detected faces */
+  processEyeStatus: (faces: Face[]) => void;
+  /** Reset eye status */
+  reset: () => void;
 }
 
 // ============================================================================

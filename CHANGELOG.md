@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2024-12-24
+
+### Added
+- **Real-time face detection frame processor plugin** for VisionCamera
+  - Android: `FaceDetectorFrameProcessorPlugin` using ML Kit
+  - iOS: `FaceDetectorFrameProcessorPlugin` using ML Kit
+- `isFaceDetectorAvailable()` function to check if the plugin is ready
+
+### Changed
+- Updated `detectFaces` to use VisionCamera's `VisionCameraProxy.initFrameProcessorPlugin` API
+- Added VisionCamera and ML Kit dependencies to iOS podspec
+- Added VisionCamera frame processor support to Android build.gradle
+
+### Fixed
+- Fixed "Property '__detectFaces' doesn't exist" error by implementing proper frame processor plugin
+
 ## [0.1.2] - 2024-12-24
 
 ### Fixed
@@ -50,7 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iOS (requires Expo Dev Client or Bare Workflow)
 - Android (requires Expo Dev Client or Bare Workflow)
 
-[Unreleased]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/arfuhad/react-native-smart-camera/releases/tag/v0.1.0

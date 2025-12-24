@@ -1,40 +1,51 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { BlinkEvent, UseBlinkDetectionResult } from '../types';
+import type { Face, EyeStatusResult, UseBlinkDetectionResult } from '../types';
 
 /**
  * Options for useBlinkDetection hook
  */
 export interface UseBlinkDetectionOptions {
-  /** Whether blink detection is enabled. Default: true */
+  /** Whether eye tracking is enabled. Default: true */
   enabled?: boolean;
   
-  /** Minimum time between blinks in milliseconds. Default: 300 */
-  debounceMs?: number;
+  /** Threshold below which an eye is considered closed (0-1). Default: 0.5 */
+  eyeClosedThreshold?: number;
   
-  /** Callback when a blink is detected */
-  onBlink?: (event: BlinkEvent) => void;
+  /** Callback when eye status changes */
+  onEyeStatusChange?: (status: EyeStatusResult) => void;
 }
 
 /**
- * Hook for managing blink detection state
+ * Hook for tracking eye status from detected faces
  * 
- * @param options - Blink detection options
- * @returns Blink detection state and controls
+ * This hook provides real-time eye open/closed status based on face detection results.
+ * The user can set their own threshold for determining when an eye is considered closed.
+ * 
+ * @param options - Eye tracking options
+ * @returns Eye status and controls
  * 
  * @example
  * ```tsx
- * function BlinkCounter() {
- *   const { lastBlink, blinkCount, resetCount } = useBlinkDetection({
- *     debounceMs: 300,
- *     onBlink: (event) => {
- *       console.log('Blink detected at', event.timestamp);
+ * function EyeTracker() {
+ *   const { eyeStatus, processEyeStatus } = useBlinkDetection({
+ *     eyeClosedThreshold: 0.3, // Consider eye closed when probability < 0.3
+ *     onEyeStatusChange: (status) => {
+ *       // Handle blink detection yourself based on status
+ *       if (status.leftEye.isClosed && status.rightEye.isClosed) {
+ *         console.log('Both eyes closed!');
+ *       }
  *     },
  *   });
  *   
+ *   // In your face detection callback:
+ *   const handleFaces = (faces: Face[]) => {
+ *     processEyeStatus(faces);
+ *   };
+ *   
  *   return (
  *     <View>
- *       <Text>Blinks: {blinkCount}</Text>
- *       <Button onPress={resetCount} title="Reset" />
+ *       <Text>Left Eye: {eyeStatus?.leftEye.openProbability.toFixed(2)}</Text>
+ *       <Text>Right Eye: {eyeStatus?.rightEye.openProbability.toFixed(2)}</Text>
  *     </View>
  *   );
  * }
@@ -43,51 +54,74 @@ export interface UseBlinkDetectionOptions {
 export function useBlinkDetection(
   options: UseBlinkDetectionOptions = {}
 ): UseBlinkDetectionResult {
-  const { enabled = true, debounceMs = 300, onBlink } = options;
+  const { 
+    enabled = true, 
+    eyeClosedThreshold = 0.5, 
+    onEyeStatusChange 
+  } = options;
   
-  const [lastBlink, setLastBlink] = useState<BlinkEvent | null>(null);
-  const [blinkCount, setBlinkCount] = useState(0);
-  const callbackRef = useRef(onBlink);
-  const lastBlinkTimeRef = useRef(0);
+  const [eyeStatus, setEyeStatus] = useState<EyeStatusResult | null>(null);
+  const callbackRef = useRef(onEyeStatusChange);
 
   // Keep callback ref updated
   useEffect(() => {
-    callbackRef.current = onBlink;
-  }, [onBlink]);
+    callbackRef.current = onEyeStatusChange;
+  }, [onEyeStatusChange]);
 
-  // Handle blink event (called from frame processor)
-  const handleBlink = useCallback((event: BlinkEvent) => {
-    const now = Date.now();
-    
-    // Apply debounce
-    if (now - lastBlinkTimeRef.current < debounceMs) {
+  // Process faces to get eye status (call this from JS thread with detected faces)
+  const processEyeStatus = useCallback((faces: Face[]) => {
+    if (!enabled || faces.length === 0) {
       return;
     }
-    
-    lastBlinkTimeRef.current = now;
-    setLastBlink(event);
-    setBlinkCount((prev) => prev + 1);
-    callbackRef.current?.(event);
-  }, [debounceMs]);
 
-  // Reset blink count
-  const resetCount = useCallback(() => {
-    setBlinkCount(0);
-    setLastBlink(null);
-    lastBlinkTimeRef.current = 0;
+    // Use the first face (most prominent)
+    const face = faces[0];
+
+    // Ensure we have eye classification data
+    if (
+      face.leftEyeOpenProbability === undefined ||
+      face.rightEyeOpenProbability === undefined
+    ) {
+      return;
+    }
+
+    const leftOpenProbability = face.leftEyeOpenProbability;
+    const rightOpenProbability = face.rightEyeOpenProbability;
+    const now = Date.now();
+
+    const status: EyeStatusResult = {
+      leftEye: {
+        openProbability: leftOpenProbability,
+        isClosed: leftOpenProbability < eyeClosedThreshold,
+      },
+      rightEye: {
+        openProbability: rightOpenProbability,
+        isClosed: rightOpenProbability < eyeClosedThreshold,
+      },
+      faceId: face.trackingId,
+      timestamp: now,
+    };
+
+    setEyeStatus(status);
+    callbackRef.current?.(status);
+  }, [enabled, eyeClosedThreshold]);
+
+  // Reset eye status
+  const reset = useCallback(() => {
+    setEyeStatus(null);
   }, []);
 
   // Reset on disable
   useEffect(() => {
     if (!enabled) {
-      resetCount();
+      reset();
     }
-  }, [enabled, resetCount]);
+  }, [enabled, reset]);
 
   return {
-    lastBlink,
-    blinkCount,
-    resetCount,
+    eyeStatus,
+    processEyeStatus,
+    reset,
   };
 }
 

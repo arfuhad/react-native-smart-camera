@@ -1,4 +1,3 @@
-import SmartCameraModule from '../SmartCameraModule';
 import type { Face, StaticImageOptions } from '../types';
 
 /**
@@ -16,23 +15,23 @@ const DEFAULT_OPTIONS: Partial<StaticImageOptions> = {
 /**
  * Detect faces in a static image
  * 
+ * NOTE: Static image detection is currently not supported in the frame processor-only version.
+ * This feature requires native module implementation.
+ * For real-time face detection, use the `detectFaces` function with VisionCamera frame processor.
+ * 
  * @param options - Image source and detection options
  * @returns Promise resolving to array of detected faces
  * 
  * @example
  * ```tsx
- * // Using require
- * const faces = await detectFacesInImage({
- *   image: require('./photo.jpg'),
- *   performanceMode: 'accurate',
- *   landmarkMode: 'all',
- * });
+ * // This feature is not yet implemented
+ * // For real-time detection, use:
+ * import { detectFaces } from '@arfuhad/react-native-smart-camera';
  * 
- * // Using URI
- * const faces = await detectFacesInImage({
- *   image: { uri: 'https://example.com/photo.jpg' },
- *   classificationMode: 'all',
- * });
+ * const frameProcessor = useFrameProcessor((frame) => {
+ *   'worklet';
+ *   const faces = detectFaces(frame);
+ * }, []);
  * ```
  */
 export async function detectFacesInImage(options: StaticImageOptions): Promise<Face[]> {
@@ -41,11 +40,14 @@ export async function detectFacesInImage(options: StaticImageOptions): Promise<F
     ...options,
   };
 
-  try {
-    return await SmartCameraModule.detectFacesInImage(mergedOptions);
-  } catch (error) {
-    console.error('[SmartCamera] Error detecting faces in image:', error);
-    throw error;
-  }
+  // TODO: Implement static image detection
+  // This requires either:
+  // 1. A separate native module for static image processing
+  // 2. Using react-native-ml-kit directly
+  console.warn(
+    '[SmartCamera] Static image detection is not yet implemented. ' +
+    'For real-time face detection, use the detectFaces function with VisionCamera frame processor.'
+  );
+  
+  return [];
 }
-

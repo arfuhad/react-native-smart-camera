@@ -1,18 +1,18 @@
 {
   "name": "@arfuhad/react-native-smart-camera",
-  "version": "0.1.2",
-  "description": "Expo-compatible native module for camera preview, face detection, blink detection, and WebRTC streaming",
+  "version": "0.1.4",
+  "description": "VisionCamera frame processor plugin for face detection, blink detection, and WebRTC streaming",
   "main": "build/index.js",
   "types": "build/index.d.ts",
+  "react-native": "src/index.ts",
+  "source": "src/index.ts",
   "scripts": {
-    "build": "expo-module build",
+    "build": "tsc --project tsconfig.build.json",
     "build:plugin": "tsc --project plugin/tsconfig.json",
-    "clean": "expo-module clean && rm -rf plugin/build",
-    "lint": "expo-module lint",
-    "test": "expo-module test",
-    "prepare": "expo-module prepare && npm run build:plugin",
-    "prepublishOnly": "expo-module prepublishOnly",
-    "expo-module": "expo-module"
+    "clean": "rm -rf build plugin/build",
+    "lint": "eslint src --ext .ts,.tsx",
+    "prepare": "npm run build && npm run build:plugin",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
     "react-native",
@@ -23,16 +23,16 @@
     "webrtc",
     "vision-camera",
     "ml-kit",
-    "expo-module",
     "frame-processor"
   ],
   "files": [
+    "src",
     "build",
     "ios",
     "android",
     "plugin/build",
     "app.plugin.js",
-    "expo-module.config.json",
+    "react-native-smart-camera.podspec",
     "README.md",
     "ARCHITECTURE.md",
     "CHANGELOG.md"

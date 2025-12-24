@@ -1,4 +1,3 @@
-import SmartCameraModule from '../SmartCameraModule';
 import type {
   WebRTCVideoSourceConfig,
   WebRTCStreamStats,
@@ -7,6 +6,9 @@ import type {
 
 /**
  * WebRTC Bridge for SmartCamera
+ * 
+ * NOTE: This is a stub implementation. WebRTC functionality is not yet implemented.
+ * This class provides the interface for future WebRTC integration.
  * 
  * This class provides a bridge between VisionCamera frames and WebRTC,
  * allowing camera frames to be streamed via WebRTC peer connections.
@@ -26,7 +28,7 @@ export class WebRTCBridge {
       return;
     }
 
-    await SmartCameraModule.initializeWebRTC();
+    console.warn('[WebRTCBridge] WebRTC is not yet implemented');
     this.isInitialized = true;
   }
 
@@ -45,12 +47,8 @@ export class WebRTCBridge {
       await this.stopStreaming();
     }
 
+    console.warn('[WebRTCBridge] WebRTC streaming is not yet implemented');
     this.config = config;
-    await SmartCameraModule.startWebRTCStream({
-      width: config.width,
-      height: config.height,
-      frameRate: config.frameRate,
-    });
     this.isStreaming = true;
   }
 
@@ -62,7 +60,6 @@ export class WebRTCBridge {
       return;
     }
 
-    await SmartCameraModule.stopWebRTCStream();
     this.isStreaming = false;
     this.config = null;
   }
@@ -87,7 +84,6 @@ export class WebRTCBridge {
    * @param settings - Quality settings to apply
    */
   async updateQuality(settings: WebRTCQualitySettings): Promise<void> {
-    // This would call a native method to adjust encoder settings
     console.log('[WebRTCBridge] Updating quality:', settings);
   }
 
@@ -99,8 +95,6 @@ export class WebRTCBridge {
       return null;
     }
 
-    // This would call a native method to get stats
-    // For now, return placeholder
     return {
       frameRate: this.config?.frameRate ?? 0,
       framesSent: 0,
@@ -131,4 +125,3 @@ export function getWebRTCBridge(): WebRTCBridge {
   }
   return bridgeInstance;
 }
-
