@@ -51,9 +51,9 @@ export type {
   EyeStatus,
   EyeStatusResult,
 
-  // WebRTC
+  // WebRTC (from main types)
   WebRTCMode,
-  VideoConstraints,
+  VideoConstraints as WebRTCVideoConstraintsLegacy,
   WebRTCConfig,
 
   // Component Props
@@ -81,7 +81,7 @@ export type {
 // ADDITIONAL FEATURES (our package only)
 // =============================================================================
 
-// Blink detection
+// Blink/Eye detection
 export { useBlinkDetection, type UseBlinkDetectionOptions } from './hooks/useBlinkDetection';
 export { processBlinkFromFaces, resetBlinkStates, getEyeState } from './detection/blinkProcessor';
 
@@ -105,8 +105,66 @@ export {
 } from './utils';
 
 // =============================================================================
-// WEBRTC (Optional - requires react-native-webrtc)
+// WEBRTC VIDEO CALLING (requires react-native-webrtc)
 // =============================================================================
 
+// Main WebRTC hook
+export { useWebRTC } from './hooks/useWebRTC';
+export type { UseWebRTCOptions, UseWebRTCResult } from './hooks/useWebRTC';
+
+// Combined WebRTC + Face Detection hook
+export { useWebRTCWithDetection } from './hooks/useWebRTCWithDetection';
+export type { UseWebRTCWithDetectionOptions } from './hooks/useWebRTCWithDetection';
+export type { UseWebRTCWithDetectionResult } from './hooks/useWebRTCWithDetection';
+
+// WebRTC Manager class
+export {
+  WebRTCManager,
+  getWebRTCManager,
+  createWebRTCManager,
+  isWebRTCAvailable,
+} from './webrtc/WebRTCManager';
+
+// WebRTC Types
+export type {
+  // Core types
+  ICEServer,
+  PeerConnectionConfig,
+  VideoConstraints,
+  AudioConstraints,
+  MediaConstraints,
+  
+  // State types
+  CallState,
+  WebRTCConnectionState,
+  ICEConnectionState,
+  ICEGatheringState,
+  SignalingState,
+  
+  // Stream types
+  VideoFrameFormat,
+  WebRTCVideoSourceConfig,
+  WebRTCStreamStats,
+  WebRTCQualitySettings,
+  
+  // Event types
+  WebRTCStreamEvent,
+  ICECandidateEvent,
+  SessionDescription,
+} from './webrtc/types';
+
+// Default configurations
+export {
+  DEFAULT_ICE_SERVERS,
+  DEFAULT_PEER_CONNECTION_CONFIG,
+  DEFAULT_MEDIA_CONSTRAINTS,
+} from './webrtc/types';
+
+// =============================================================================
+// LEGACY EXPORTS (deprecated - kept for backwards compatibility)
+// =============================================================================
+
+/** @deprecated Use useWebRTC instead */
 export { useSmartCameraWebRTC, type UseSmartCameraWebRTCOptions } from './hooks/useSmartCameraWebRTC';
+/** @deprecated Use WebRTCManager instead */
 export { WebRTCBridge, getWebRTCBridge } from './webrtc';

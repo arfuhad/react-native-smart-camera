@@ -1,6 +1,6 @@
 {
   "name": "@arfuhad/react-native-smart-camera",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "VisionCamera frame processor plugin for face detection, blink detection, and WebRTC streaming",
   "main": "build/index.js",
   "types": "build/index.d.ts",

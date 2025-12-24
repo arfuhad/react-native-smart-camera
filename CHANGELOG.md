@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] - 2024-12-24
+
+### Added
+- **WebRTC Video Calling** - Full-featured WebRTC integration for peer-to-peer video calls
+  - `useWebRTC` hook for managing video calls with local/remote streams
+  - `useWebRTCWithDetection` hook combining WebRTC + face detection + eye tracking
+  - `WebRTCManager` class for low-level WebRTC control
+  - Signaling helpers: `createOffer`, `createAnswer`, `setRemoteDescription`, `addIceCandidate`
+  - Media controls: `switchCamera`, `toggleAudio`, `toggleVideo`
+  - Call state tracking: `idle`, `connecting`, `connected`, `disconnected`
+  
+- **WebRTC Types**
+  - `ICEServer`, `PeerConnectionConfig` for connection configuration
+  - `MediaConstraints`, `VideoConstraints`, `AudioConstraints`
+  - `CallState`, `WebRTCConnectionState`, `ICEConnectionState`
+  - `SessionDescription`, `ICECandidateEvent` for signaling
+  - Default configurations: `DEFAULT_ICE_SERVERS`, `DEFAULT_PEER_CONNECTION_CONFIG`
+
+- **Eye Status API** - Updated `useBlinkDetection` hook
+  - Returns real-time `eyeStatus` with `leftEye` and `rightEye` open probability
+  - User-configurable `eyeClosedThreshold` (default 0.5)
+  - `processEyeStatus(faces)` function to process detected faces
+  - `onEyeStatusChange` callback for status updates
+
+### Changed
+- **Breaking**: `useBlinkDetection` now returns `eyeStatus` instead of `blinkCount`
+  - Old: `{ lastBlink, blinkCount, resetCount }`
+  - New: `{ eyeStatus, processEyeStatus, reset }`
+  - Users implement their own blink counting logic using `onEyeStatusChange`
+
+- Updated README with comprehensive WebRTC and eye tracking documentation
+- Example app now includes tabbed interface with Face Detection and Video Call screens
+- Example app integrates with Socket.io signaling server for real video calls
+
+### Deprecated
+- `useSmartCameraWebRTC` - Use `useWebRTC` instead
+- `WebRTCBridge` - Use `WebRTCManager` instead
+
+## [0.1.4] - 2024-12-24
+
+### Added
+- `useFaceDetector` hook matching `react-native-vision-camera-face-detector` API
+- `useFaceDetectorWithCallback` convenience hook
+- All ML Kit contour types support (LEFT_EYEBROW_TOP, LEFT_EYEBROW_BOTTOM, etc.)
+- `autoMode` option for automatic coordinate scaling
+
+### Changed
+- Restructured package as pure React Native module (removed Expo module dependency)
+- Updated native plugin registration for standard React Native autolinking
+- Moved podspec to package root as `react-native-smart-camera.podspec`
+
+### Fixed
+- Fixed duplicate module registration issues
+- Fixed frame processor plugin registration on Android and iOS
+
 ## [0.1.3] - 2024-12-24
 
 ### Added
@@ -66,10 +121,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iOS (requires Expo Dev Client or Bare Workflow)
 - Android (requires Expo Dev Client or Bare Workflow)
 
-[Unreleased]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/arfuhad/react-native-smart-camera/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/arfuhad/react-native-smart-camera/releases/tag/v0.1.0
-
-
